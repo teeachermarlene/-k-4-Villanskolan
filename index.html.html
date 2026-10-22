@@ -1,0 +1,452 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Årskurs 4 Villanskolan</title>
+<style>
+:root{--ink:#24313a;--muted:#66737b;--paper:#fffdf8;--line:#e7e1d7;--accent:#2f6f62;--accent2:#e8f2ee}
+*{box-sizing:border-box} body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Arial,sans-serif;color:var(--ink);background:#f6f2ea}
+main{max-width:1000px;margin:auto;padding:28px 18px 50px}.hero{background:var(--paper);border:1px solid var(--line);border-radius:24px;padding:28px;margin-bottom:18px}
+h1{margin:0 0 8px;font-size:clamp(28px,5vw,46px)}h2{margin:0 0 8px}.muted{color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.card,.task,.answer,.back,.next{font:inherit}
+.card{min-height:165px;text-align:left;padding:20px;border:1px solid var(--line);border-radius:22px;background:var(--paper);cursor:pointer}
+.card:hover,.task:hover,.answer:hover{border-color:#9db8af}.icon{font-size:42px;display:block;margin-bottom:14px}.card strong{font-size:20px}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:22px;padding:22px}.hidden{display:none}
+.back,.next{border:0;border-radius:12px;padding:12px 16px;cursor:pointer;font-weight:700}.back{background:#ece8df;margin-bottom:18px}.next{background:var(--accent);color:white;margin-top:14px}
+.tasks{display:grid;gap:10px;margin-top:18px}.task,.answer{width:100%;text-align:left;padding:15px 16px;border:1px solid var(--line);border-radius:14px;background:white;cursor:pointer;font-weight:650}
+.disabled{opacity:.55;cursor:not-allowed}.quizhead{display:flex;justify-content:space-between;gap:12px;color:var(--muted);font-weight:700}.answers{display:grid;gap:10px;margin-top:16px}.feedback{min-height:28px;margin-top:14px;font-weight:800}.good{color:#26734d}.bad{color:#a34538}
+@media(max-width:700px){.grid{grid-template-columns:repeat(2,1fr)}}@media(max-width:420px){.grid{grid-template-columns:1fr}.hero{padding:21px}}
+</style>
+</head>
+<body>
+<main>
+<section id="home">
+  <div class="hero">
+    <div class="muted"><b>VÄLKOMMEN TILL</b></div>
+    <h1>🏫 Årskurs 4 Villanskolan</h1>
+    <p class="muted">Välj ett ämnesrum och träna på det vi arbetar med i skolan.</p>
+  </div>
+  <div id="rooms" class="grid"></div>
+</section>
+
+<section id="room" class="hidden panel">
+  <button class="back" id="homeBtn">← Alla ämnesrum</button>
+  <div id="roomIcon" class="icon"></div><h2 id="roomTitle"></h2>
+  <p class="muted">Välj vad du vill träna på.</p><div id="tasks" class="tasks"></div>
+</section>
+
+
+<section id="weekly" class="hidden panel">
+  <button class="back" id="weeklyBack">← Tillbaka till Svenskarummet</button>
+  <div class="icon">📖</div><h2>Veckans ord</h2>
+  <div style="margin-top:14px;padding:18px;border-radius:18px;background:#eef8fd;border:1px solid #b9dff2;line-height:1.5">
+    <h3 style="margin:0 0 8px">⭐ Veckans ord ⭐</h3>
+    <p>Varje vecka får du nya ord att träna på.<br>Målet är att du ska lära känna orden riktigt bra!</p>
+    <p><b>När du har tränat på Veckans ord ska du:</b></p>
+    <p>🔊 <b>Kunna uttala orden</b><br><span class="muted">Du ska kunna läsa och säga orden rätt.</span></p>
+    <p>✏️ <b>Kunna stava orden</b><br><span class="muted">Du ska kunna skriva orden rätt utan att titta.</span></p>
+    <p>💡 <b>Förstå vad orden betyder</b><br><span class="muted">Du ska kunna förklara orden med egna ord.</span></p>
+    <p>💬 <b>Kunna använda orden i meningar</b><br><span class="muted">Du ska kunna skriva en mening där ordet används på rätt sätt.</span></p>
+    <p style="margin-bottom:0"><b>Träna lite flera gånger under veckan!</b><br><span class="muted">Att öva flera korta stunder hjälper dig att komma ihåg orden bättre. ❤️</span></p>
+  </div>
+  <h3 style="margin-top:24px">Välj vecka</h3>
+  <div id="weekButtons" class="tasks"></div>
+</section>
+
+<section id="wordlist" class="hidden panel">
+  <button class="back" id="wordBack">← Alla veckor</button>
+  <div class="quizhead"><span id="weekTitle"></span><span>📚 Veckans ord</span></div>
+  <div id="wordCards" class="tasks" style="margin-top:18px"></div>
+  <button id="practiceWeek" class="next">💡 Träna betydelsen →</button><button id="spellWeek" class="next" style="margin-left:8px">✏️ Träna stavning →</button><button id="flashWeek" class="next" style="margin-left:8px">🃏 Flashcards →</button><button id="memoryWeek" class="next" style="margin-left:8px">🧠 Memory →</button>
+</section>
+
+
+
+<section id="flashcards" class="hidden panel">
+<button class="back" id="flashBack">← Tillbaka till veckans ord</button>
+<div class="quizhead"><span id="flashTitle">🃏 Flashcards</span><span id="flashCount"></span></div>
+<p class="muted">Försök förklara ordet själv. Klicka sedan på kortet för att se förklaringen.</p>
+<div id="flashCard" class="task" style="margin-top:24px;min-height:190px;display:flex;align-items:center;justify-content:center;text-align:center;font-size:1.25em;padding:28px;cursor:pointer"></div>
+<div style="margin-top:16px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+<button id="flashPrev" class="back">← Föregående</button><button id="flashFlip" class="next">Vänd kortet</button><button id="flashNext" class="next">Nästa →</button>
+</div></section>
+<section id="memory" class="hidden panel">
+<button class="back" id="memoryBack">← Tillbaka till veckans ord</button>
+<div class="quizhead"><span id="memoryTitle">🧠 Memory</span><span id="memoryStatus"></span></div>
+<p class="muted">Hitta paren: ett ord och rätt förklaring hör ihop. Klicka på två kort i taget.</p>
+<div id="memoryGrid" style="margin-top:20px;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px"></div>
+<div id="memoryDone" style="margin-top:18px;text-align:center;font-weight:700"></div>
+</section>
+<section id="spelling" class="hidden panel">
+  <button class="back" id="spellingBack">← Tillbaka till veckans ord</button>
+  <div class="quizhead"><span id="spellingTitle">✏️ Träna stavning</span><span id="spellingScore"></span></div>
+  <div style="margin-top:16px;padding:14px 16px;border-radius:14px;background:#f4f7f5;border:1px solid var(--line)">
+    <b>💡 Så här gör du!</b>
+    <div style="margin-top:6px;line-height:1.45">Läs förklaringen och skriv ordet utan att titta på stavningen. Böjda former godkänns också, till exempel ätt, ätten, ätter och ätterna.</div>
+  </div>
+  <div id="spellingArea" style="margin-top:22px"></div>
+</section>
+
+<section id="quiz" class="hidden panel">
+  <button class="back" id="roomBtn">← Tillbaka</button>
+  <div class="quizhead"><span id="quizName"></span><span id="score"></span></div><div id="rememberBox" style="margin-top:16px;padding:14px 16px;border-radius:14px;background:#f4f7f5;border:1px solid var(--line)"><b>💡 Kom ihåg!</b><div id="rememberText" style="margin-top:6px;line-height:1.45"></div></div>
+  <h2 id="question" style="margin-top:18px"></h2><div id="answers" class="answers"></div>
+  <div id="feedback" class="feedback" aria-live="polite"></div>
+  <button id="next" class="next hidden">Nästa fråga →</button>
+</section>
+</main>
+<script>
+const rooms={
+ matematik:{title:"Matematik",icon:"🔢",sub:"Räkna och klura",tasks:["Multiplikation","Addition & subtraktion","Matematiska begrepp"]},
+ svenska:{title:"Svenska",icon:"📚",sub:"Ord, meningar och språk",tasks:["Veckans ord","Stor och liten bokstav – versaler och gemener","Skiljetecken","Korrekt mening","Vokal eller konsonant?","Lång eller kort vokal?","Svenskamästaren"]},
+ so:{title:"SO",icon:"🌍",sub:"Historia och geografi",tasks:["Vikingatiden","Sveriges geografi","Naturresurser"]},
+ no:{title:"NO",icon:"🔬",sub:"Upptäck naturen",tasks:["Djur & natur","Kroppen","Experiment"]},
+ engelska:{title:"Engelska",icon:"🇬🇧",sub:"Words and language",tasks:["Words","Grammar","Reading"]},
+ blandat:{title:"Blandat",icon:"⭐",sub:"Lite av varje",tasks:["Snabbquiz","Dagens utmaning","Blandade frågor"]}
+};
+const quizzes={
+"Multiplikation":[["Vad är 6 × 7?",["36","42","48"],1],["Vad är 8 × 4?",["24","32","36"],1],["Vad är 9 × 5?",["40","45","50"],1]],
+"Addition & subtraktion":[["Vad är 245 + 130?",["365","375","385"],1],["Vad är 500 − 175?",["315","325","335"],1]],
+"Matematiska begrepp":[["Vad kallas svaret i en addition?",["produkt","summa","differens"],1],["Vad kallas svaret i en subtraktion?",["differens","faktor","summa"],0]],
+
+"Stor och liten bokstav – versaler och gemener":[
+["Vilken liten bokstav (gemen) hör ihop med G?",["g","q","j"],0],
+["Vilken stor bokstav (versal) hör ihop med m?",["N","M","W"],1],
+["Vilken gemen (liten bokstav) hör ihop med R?",["r","p","n"],0],
+["Vilken versal (stor bokstav) hör ihop med b?",["D","B","P"],1],
+["Vilken rad har bara gemener (små bokstäver)?",["a b c d","A b C d","A B C D"],0],
+["Vilken rad har bara versaler (stora bokstäver)?",["k l m n","K L M N","K l M n"],1],
+["Vilken bokstav är en versal (stor bokstav)?",["e","E","é"],1],
+["Vilken bokstav är en gemen (liten bokstav)?",["T","t","7"],1],
+["Vilket namn är skrivet rätt?",["emma","Emma","EMma"],1],
+["Vilken mening börjar med versal?",["katten sover.","Katten sover.","kAtten sover."],1]
+],
+
+"Skiljetecken":[
+["Vilket skiljetecken passar? Hur mår du__",[".", "?", "!"],1],
+["Vilket skiljetecken passar? Stanna__",[".", "?", "!"],2],
+["Vilket skiljetecken passar? Jag gillar glass__",[".", "?", "!"],0],
+["Vilket tecken använder vi när vi ställer en fråga?",["punkt","frågetecken","komma"],1],
+["Vilket tecken avslutar oftast ett påstående?",["punkt","utropstecken","komma"],0],
+["Vilket tecken kan visa stark känsla eller uppmaning?",["utropstecken","frågetecken","komma"],0],
+["Vilket tecken kan användas för en kort paus i en mening?",["punkt","komma","frågetecken"],1],
+["Vilken mening är rätt?",["Var bor du.","Var bor du?","Var bor du!"],1],
+["Vilken mening är rätt?",["Akta dig!","Akta dig?","Akta dig,"],0],
+["Vilken mening är rätt?",["Vi går hem nu.","Vi går hem nu?","Vi går hem nu,"],0]
+],
+
+"Korrekt mening":[
+["Vilken mening är skriven rätt?",["hunden springer fort.","Hunden springer fort.","Hunden springer fort"],1],
+["Vilken mening är skriven rätt?",["Jag äter frukost.","jag äter frukost.","Jag äter frukost"],0],
+["Rätta: katten ligger på stolen",["Katten ligger på stolen.","katten ligger på stolen.","Katten ligger på stolen"],0],
+["Rätta: vi går till skolan",["Vi går till skolan.","vi går till skolan.","Vi går till skolan"],0],
+["Vilken mening har både stor bokstav och avslutande punkt?",["Fågeln flyger.","fågeln flyger.","Fågeln flyger"],0],
+["Vilken mening är rätt?",["Min syster heter Sara.","min syster heter Sara.","Min syster heter sara."],0],
+["Rätta: idag regnar det",["Idag regnar det.","idag regnar det.","Idag regnar det"],0],
+["Vilken är en fullständig korrekt mening?",["Bollen är röd.","bollen är röd","Bollen är röd"],0],
+["Vad ska en vanlig mening börja med?",["En punkt","Stor bokstav","Komma"],1],
+["Vad ska en vanlig påståendemening avslutas med?",["Stor bokstav","Punkt","Vokal"],1]
+],
+
+"Vokal eller konsonant?":[
+["Vilken bokstav är en vokal?",["m","a","t"],1],
+["Vilken bokstav är en konsonant?",["e","o","k"],2],
+["Vilken rad innehåller bara vokaler?",["a e i","b d f","a b e"],0],
+["Vilken rad innehåller bara konsonanter?",["m s t","a o u","k e r"],0],
+["Är y en vokal eller konsonant?",["Vokal","Konsonant","Inget av dem"],0],
+["Vilken bokstav är en vokal?",["å","r","n"],0],
+["Vilken bokstav är en konsonant?",["ö","ä","s"],2],
+["Hur många vokaler finns i ordet sol?",["1","2","3"],0],
+["Hur många vokaler finns i ordet kaka?",["1","2","3"],1],
+["Vilken lista visar de svenska vokalerna?",["a e i o u y å ä ö","a b c d e f g","b c d f g h j"],0]
+],
+
+"Lång eller kort vokal?":[
+["Hur låter vokalen i ordet TAK?",["Lång","Kort"],0],
+["Hur låter vokalen i ordet TACK?",["Lång","Kort"],1],
+["Hur låter vokalen i ordet GLAS?",["Lång","Kort"],0],
+["Hur låter vokalen i ordet GLASS?",["Lång","Kort"],1],
+["Hur låter vokalen i ordet FUL?",["Lång","Kort"],0],
+["Hur låter vokalen i ordet FULL?",["Lång","Kort"],1],
+["Hur låter vokalen i ordet MAT?",["Lång","Kort"],0],
+["Hur låter vokalen i ordet MATT?",["Lång","Kort"],1],
+["Vilket ord har lång vokal?",["tak","tack"],0],
+["Vilket ord har kort vokal?",["glas","glass"],1]
+],
+
+"Svenskamästaren":[
+["Vilken stor bokstav (versal) hör ihop med g?",["G","J","Q"],0],
+["Vilken mening är rätt?",["hunden skäller.","Hunden skäller.","Hunden skäller"],1],
+["Vilket skiljetecken passar? Vad heter du__",[".","?","!"],1],
+["Vilken bokstav är en vokal?",["r","u","k"],1],
+["Vilken bokstav är en konsonant?",["ö","m","a"],1],
+["Hur låter vokalen i TAK?",["Lång","Kort"],0],
+["Hur låter vokalen i TACK?",["Lång","Kort"],1],
+["Vilken rad har bara gemener (små bokstäver)?",["a b c","A B C","a B c"],0],
+["Vilken mening är rätt?",["Vi spelar fotboll.","vi spelar fotboll.","Vi spelar fotboll"],0],
+["Vilket tecken kan visa en stark uppmaning?",["!","?",","],0],
+["Hur många vokaler finns i ordet bil?",["1","2","3"],0],
+["Vilket ord har kort vokal?",["ful","full"],1],
+["Vilken mening börjar med stor bokstav?",["Solen lyser.","solen lyser.","sOlen lyser."],0],
+["Vilket tecken avslutar oftast ett påstående?",[".","?",","],0],
+["Vilken lista visar bara vokaler?",["e i ö","m n r","a k u"],0]
+],
+
+"Vikingatiden":[["Ungefär när började vikingatiden?",["år 800","år 1500","år 1900"],0],["Vad kallades en person som inte var fri under vikingatiden?",["kung","träl","bonde"],1]],
+"Sveriges geografi":[["Vilken landsdel ligger längst norrut?",["Götaland","Svealand","Norrland"],2],["Hur många landskap har Sverige?",["21","25","290"],1]],
+"Naturresurser":[["Vilken av dessa är en naturresurs?",["plast","skog","mobiltelefon"],1],["Vilken naturresurs kan ge vattenkraft?",["vatten","berggrund","odlingsmark"],0]]
+}
+
+const weeklyWords={
+"v.37":[
+["demokrati","När folket får vara med och bestämma, till exempel genom att rösta."],
+["diktatur","När en person eller en liten grupp bestämmer."],
+["rösträtt","Rätten att få rösta i ett val. Alla över 18 år har rösträtt."],
+["alltid","Något som händer eller gäller hela tiden."],
+["aldrig","Något som inte händer någon gång."],
+["rättighet","Något som man har rätt till eller får göra."],
+["bestämma","Att välja hur något ska vara eller vad som ska göras."],
+["förening","En grupp människor som gör något tillsammans, ofta för att de har samma intresse."]
+],
+"v.38":[
+["demokrati","När folket får vara med och bestämma, till exempel genom att rösta."],
+["diktatur","När en person eller en liten grupp bestämmer."],
+["rösträtt","Rätten att få rösta i ett val. Alla över 18 år har rösträtt."],
+["alltid","Något som händer eller gäller hela tiden."],
+["aldrig","Något som inte händer någon gång."],
+["rättighet","Något som man har rätt till eller får göra."],
+["bestämma","Att välja hur något ska vara eller vad som ska göras."],
+["förening","En grupp människor som gör något tillsammans, ofta för att de har samma intresse."]
+],
+"v.39":[
+["addition","Att lägga ihop flera tal."],["summa","Resultatet när man lägger ihop tal."],
+["subtraktion","Att ta bort ett tal från ett annat tal."],["differens","Resultatet när man drar ifrån tal."],
+["term","Ett tal som ingår i en beräkning när det handlar om addition och subtraktion."],
+["multiplikation","Att ta ett tal flera gånger."],["faktor","Ett tal som multipliceras."],
+["produkt","Resultatet när man multiplicerar tal."]
+],
+"v.40":[
+["snäll","Att vara vänlig, hjälpsam och tänka gott om andra."],["rolig","Något eller någon som får andra att skratta och bli glada."],
+["otrevlig","Att vara sur, oartig eller inte vänlig mot andra."],["elak","Att medvetet såra eller vara dum mot någon."],
+["modig","Att våga göra något fast det känns svårt eller läskigt."],["avundsjuk","Att känna att man vill ha något som någon annan har."],
+["omtänksam","Att tänka på och bry sig om andra."],["osäker","Att känna sig tveksam, orolig eller inte riktigt våga."],
+["glad","Att känna sig nöjd, positiv och ha en bra känsla."]
+],
+"v.41":[
+["skjutit","Efter att jag hade skjutit bollen i mål blev jag jätteglad."],
+["sköt","Igår sköt jag min sista pil och träffade bullseye!"],
+["skida","Hon tappade sin ena skida när hon åkte nerför fjället."],
+["själv","Han gillar att läsa en bok helt för sig själv i tystnaden."],
+["stjärna","Titta på den klara stjärna som lyser på natthimlen."],
+["skjorta","Jag strök min favorit skjorta inför festen."],
+["sjuksköterska","En snäll sjuksköterska kom och tog hand om mitt sår."],
+["station","Vi väntar på tåget vid Malmö centralstation."]
+],
+"v.42":[
+["läskigt","Det var läskigt att gå ensam i mörkret."],["rysligt","Ett rysligt skrik hördes från vinden."],
+["kusligt","Det var kusligt tyst i det gamla huset."],["otäckt","Den mörka källaren var otäck."],
+["hemskt","Hon drömde en hemsk mardröm."],["skrämmande","Häxans blick var skrämmande."],
+["ohyggligt","Ett ohyggligt vrål hördes bakom dörren."],["fasansfullt","Det var en fasansfull syn som mötte dem."]
+],
+"v.43":[
+["plötsligt","Något händer snabbt och oväntat. Plötsligt hörde jag ett konstigt ljud bakom mig."],
+["försiktigt","Att göra något varsamt och med stor uppmärksamhet. Jag smög försiktigt in i det gamla huset."],
+["skugga","Ett mörkt område som bildas när något hindrar ljuset. En skugga rörde sig på väggen."],
+["viskade","Pratade med mycket låg röst. Jag viskade till min vän att vi måste gå härifrån."],
+["knarrade","Gav ifrån sig ett gnisslande eller knakande ljud. Dörren knarrade när jag öppnade den lite."],
+["försvann","Syntes eller fanns inte längre. Gestalten stod där en stund, men den försvann sedan spårlöst."],
+["skräckslagen","Väldigt rädd. Jag blev skräckslagen när jag hörde det höga skriket."],
+["hemlighetsfull","Mystisk och svår att förstå eller veta något om. Det gamla huset var hemlighetsfullt och ingen visste vad som fanns där inne."]
+],
+"v.45":[
+["ätten","En grupp av släktingar som räknade sitt gemensamma ursprung."],
+["husbonden","Mannen som var herre över gården och alla som bodde där."],
+["smeder","Personer som arbetar med att smida metall, som järn."],
+["träl","En ofri person som tvingades arbeta utan lön och som kunde köpas och säljas."],
+["bönder","Människor som arbetar med jordbruk och boskapsskötsel."],
+["handelsplats","En plats där människor samlades för att köpa och sälja varor."],
+["krigsbyten","Värdefulla föremål och rikedomar som togs under krig eller plundringståg."],
+["by","En samling hus där flera familjer bor nära varandra."]
+]
+};
+let selectedWeek=null;
+
+const reminders={
+"Stor och liten bokstav – versaler och gemener":"En versal är en stor bokstav och en gemen är en liten bokstav. En mening börjar med stor bokstav. Namn på personer och platser börjar också med stor bokstav.",
+"Skiljetecken":"Punkt (.) avslutar oftast ett påstående. Frågetecken (?) avslutar en fråga. Utropstecken (!) kan visa stark känsla eller en uppmaning. Komma (,) kan markera en kort paus.",
+"Korrekt mening":"En mening börjar med stor bokstav och avslutas med ett skiljetecken. Ett påstående avslutas oftast med punkt.",
+"Vokal eller konsonant?":"Vokalerna är a, e, i, o, u, y, å, ä och ö. Alla andra bokstäver i alfabetet är konsonanter.",
+"Lång eller kort vokal?":"En vokal kan låta lång eller kort. Jämför tak–tack, glas–glass och ful–full. Säg orden högt och lyssna på vokalen.",
+"Svenskamästaren":"Tänk på allt du har tränat: versal och gemen, stor bokstav i början av meningar, avslutande skiljetecken, vokaler och konsonanter samt lång och kort vokal."
+};
+let currentRoom=null,currentQuiz=null,q=0,points=0,locked=false;
+const $=id=>document.getElementById(id);
+function show(id){["home","room","weekly","wordlist","flashcards","memory","spelling","quiz"].forEach(x=>$(x).classList.add("hidden"));$(id).classList.remove("hidden")}
+function buildRooms(){
+ const el=$("rooms");
+ Object.entries(rooms).forEach(([key,r])=>{
+  const b=document.createElement("button"); b.className="card";
+  b.innerHTML=`<span class="icon">${r.icon}</span><strong>${r.title}</strong><div class="muted">${r.sub}</div>`;
+  b.onclick=()=>openRoom(key); el.appendChild(b);
+ });
+}
+function openRoom(key){
+ currentRoom=key;const r=rooms[key];$("roomIcon").textContent=r.icon;$("roomTitle").textContent=r.title+"rummet";$("tasks").innerHTML="";
+ r.tasks.forEach(t=>{const b=document.createElement("button");b.className="task";b.textContent="✏️ "+t;
+  if(t==="Veckans ord") b.onclick=openWeeklyWords; else if(quizzes[t]) b.onclick=()=>startQuiz(t); else {b.disabled=true;b.classList.add("disabled");b.textContent+=" – kommer snart";}
+  $("tasks").appendChild(b);
+ }); show("room");
+}
+
+function openWeeklyWords(){
+ const box=$("weekButtons");box.innerHTML="";
+ Object.keys(weeklyWords).forEach(w=>{
+   const b=document.createElement("button");b.className="task";b.textContent="📅 "+w;
+   b.onclick=()=>openWeek(w);box.appendChild(b);
+ });
+ show("weekly");
+}
+function openWeek(w){
+ selectedWeek=w;$("weekTitle").textContent="Veckans ord "+w;
+ const box=$("wordCards");box.innerHTML="";
+ weeklyWords[w].forEach(([word,meaning])=>{
+   const d=document.createElement("div");d.className="task";d.style.cursor="default";
+   d.innerHTML=`<b style="font-size:1.08em">${word}</b><div class="muted" style="margin-top:5px;font-weight:500">${meaning}</div>`;
+   box.appendChild(d);
+ });
+ show("wordlist");
+}
+function makeWeekQuiz(w){
+ const words=weeklyWords[w];
+ const qs=words.map(([word,meaning],idx)=>{
+   const others=words.map(x=>x[0]).filter(x=>x!==word);
+   const picks=[word, others[(idx+2)%others.length], others[(idx+5)%others.length]];
+   // deterministic shuffle for varied answer positions
+   const shift=idx%3; const opts=picks.slice(shift).concat(picks.slice(0,shift));
+   return [`Vilket ord passar till förklaringen? ${meaning}`,opts,opts.indexOf(word)];
+ });
+ quizzes["Veckans ord "+w]=qs;
+ reminders["Veckans ord "+w]="Läs förklaringen noga och välj ordet som passar bäst. Målet är att förstå vad orden betyder och känna igen dem i olika sammanhang.";
+ startQuiz("Veckans ord "+w);
+}
+
+
+
+const acceptedForms={
+"demokrati":["demokrati","demokratin","demokratier","demokratierna"],
+"diktatur":["diktatur","diktaturen","diktaturer","diktaturerna"],
+"rösträtt":["rösträtt","rösträtten"],
+"rättighet":["rättighet","rättigheten","rättigheter","rättigheterna"],
+"förening":["förening","föreningen","föreningar","föreningarna"],
+"addition":["addition","additionen","additioner","additionerna"],
+"summa":["summa","summan","summor","summorna"],
+"subtraktion":["subtraktion","subtraktionen","subtraktioner","subtraktionerna"],
+"differens":["differens","differensen","differenser","differenserna"],
+"term":["term","termen","termer","termerna"],
+"multiplikation":["multiplikation","multiplikationen","multiplikationer","multiplikationerna"],
+"faktor":["faktor","faktorn","faktorer","faktorerna"],
+"produkt":["produkt","produkten","produkter","produkterna"],
+"skida":["skida","skidan","skidor","skidorna"],
+"stjärna":["stjärna","stjärnan","stjärnor","stjärnorna"],
+"skjorta":["skjorta","skjortan","skjortor","skjortorna"],
+"sjuksköterska":["sjuksköterska","sjuksköterskan","sjuksköterskor","sjuksköterskorna"],
+"station":["station","stationen","stationer","stationerna"],
+"skugga":["skugga","skuggan","skuggor","skuggorna"],
+"ätten":["ätt","ätten","ätter","ätterna"],
+"husbonden":["husbonde","husbonden","husbönder","husbönderna"],
+"smeder":["smed","smeden","smeder","smederna"],
+"träl":["träl","trälen","trälar","trälarna"],
+"bönder":["bonde","bonden","bönder","bönderna"],
+"handelsplats":["handelsplats","handelsplatsen","handelsplatser","handelsplatserna"],
+"krigsbyten":["krigsbyte","krigsbytet","krigsbyten","krigsbytena"],
+"by":["by","byn","byar","byarna"]
+};
+function isAcceptedSpelling(input,word){
+ const value=normalizeWord(input);
+ const key=normalizeWord(word);
+ const forms=acceptedForms[key] || [key];
+ return forms.some(f=>normalizeWord(f)===value);
+}
+
+
+let flashIndex=0,flashShowingBack=false;
+function startFlashcards(){flashIndex=0;flashShowingBack=false;$("flashTitle").textContent="🃏 Flashcards – "+selectedWeek;renderFlash();show("flashcards");}
+function renderFlash(){const words=weeklyWords[selectedWeek],p=words[flashIndex];$("flashCount").textContent=(flashIndex+1)+" / "+words.length;$("flashCard").innerHTML=flashShowingBack?`<div><small>Förklaring</small><br>${p[1]}</div>`:`<div><small>Ord</small><br><b style="font-size:1.35em">${p[0]}</b></div>`;}
+function flipFlash(){flashShowingBack=!flashShowingBack;renderFlash();}
+function nextFlash(){let n=weeklyWords[selectedWeek].length;flashIndex=(flashIndex+1)%n;flashShowingBack=false;renderFlash();}
+function prevFlash(){let n=weeklyWords[selectedWeek].length;flashIndex=(flashIndex-1+n)%n;flashShowingBack=false;renderFlash();}
+let memoryOpen=[],memoryMatched=new Set(),memoryBusy=false,memoryCards=[];
+function shuffleCards(a){for(let i=a.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function startMemory(){memoryOpen=[];memoryMatched=new Set();memoryBusy=false;memoryCards=[];weeklyWords[selectedWeek].forEach(([w,m],i)=>{memoryCards.push({pair:i,text:w,type:"word"});memoryCards.push({pair:i,text:m,type:"meaning"});});shuffleCards(memoryCards);$("memoryTitle").textContent="🧠 Memory – "+selectedWeek;$("memoryDone").textContent="";renderMemory();show("memory");}
+function renderMemory(){let g=$("memoryGrid");g.innerHTML="";$("memoryStatus").textContent=(memoryMatched.size/2)+" / "+weeklyWords[selectedWeek].length+" par";memoryCards.forEach((c,i)=>{let b=document.createElement("button"),open=memoryOpen.includes(i),matched=memoryMatched.has(i);b.className="task";b.style.minHeight="105px";b.style.padding="12px";b.style.fontSize=c.type==="meaning"?"0.86em":"1em";b.innerHTML=(open||matched)?(c.type==="word"?`<b>${c.text}</b>`:c.text):"❓";if(matched){b.disabled=true;b.style.opacity=".55";}b.onclick=()=>pickMemory(i);g.appendChild(b);});}
+function pickMemory(i){if(memoryBusy||memoryOpen.includes(i)||memoryMatched.has(i))return;memoryOpen.push(i);renderMemory();if(memoryOpen.length===2){let [a,b]=memoryOpen,ca=memoryCards[a],cb=memoryCards[b];if(ca.pair===cb.pair&&ca.type!==cb.type){memoryMatched.add(a);memoryMatched.add(b);memoryOpen=[];renderMemory();if(memoryMatched.size===memoryCards.length)$("memoryDone").innerHTML="⭐ Snyggt! Du hittade alla par!";}else{memoryBusy=true;setTimeout(()=>{memoryOpen=[];memoryBusy=false;renderMemory();},1100);}}}
+let spellIndex=0,spellPoints=0,spellLocked=false;
+function normalizeWord(s){return s.trim().toLocaleLowerCase("sv-SE");}
+function speakWord(word){
+ if(!("speechSynthesis" in window)){alert("Uppläsning stöds inte i den här webbläsaren.");return;}
+ speechSynthesis.cancel();
+ const u=new SpeechSynthesisUtterance(word);u.lang="sv-SE";u.rate=0.8;
+ const voices=speechSynthesis.getVoices();
+ const sv=voices.find(v=>v.lang&&v.lang.toLowerCase().startsWith("sv"));
+ if(sv)u.voice=sv;
+ speechSynthesis.speak(u);
+}
+function startSpelling(){
+ spellIndex=0;spellPoints=0;spellLocked=false;
+ $("spellingTitle").textContent="✏️ Träna stavning – "+selectedWeek;
+ renderSpelling();show("spelling");
+}
+function renderSpelling(){
+ const words=weeklyWords[selectedWeek];
+ if(spellIndex>=words.length){
+   $("spellingScore").textContent="";
+   $("spellingArea").innerHTML=`<div class="result"><h2>Klart! ⭐</h2><p>Du fick <b>${spellPoints} av ${words.length}</b> rätt på första försöket.</p><button class="next" onclick="startSpelling()">Träna igen</button><button class="next" style="margin-left:8px" onclick="openWeek(selectedWeek)">Till orden</button></div>`;
+   return;
+ }
+ spellLocked=false;
+ const [word,meaning]=words[spellIndex];
+ $("spellingScore").textContent=`${spellIndex+1} / ${words.length}`;
+ $("spellingArea").innerHTML=`
+   <div style="font-size:1.05em"><b>Förklaring:</b></div>
+   <div style="font-size:1.15em;line-height:1.5;margin:8px 0 16px">${meaning}</div>
+   <div style="margin-top:20px"><label for="spellInput"><b>Skriv ordet:</b></label></div>
+   <input id="spellInput" autocomplete="off" autocapitalize="none" spellcheck="false" style="margin-top:8px;width:min(420px,90%);font-size:1.2em;padding:12px 14px;border:2px solid var(--line);border-radius:12px" />
+   <div><button id="checkSpelling" class="next" style="margin-top:14px">Kontrollera</button></div>
+   <div id="spellFeedback" style="margin-top:14px;font-weight:700;min-height:28px"></div>`;
+ $("checkSpelling").onclick=checkSpelling;
+ $("spellInput").onkeydown=e=>{if(e.key==="Enter")checkSpelling();};
+ setTimeout(()=>$("spellInput").focus(),50);
+}
+function checkSpelling(){
+ const words=weeklyWords[selectedWeek], word=words[spellIndex][0];
+ const input=$("spellInput"),feedback=$("spellFeedback");
+ if(!input.value.trim()){feedback.textContent="Skriv ett ord först.";return;}
+ if(isAcceptedSpelling(input.value,word)){
+   if(!spellLocked)spellPoints++;
+   feedback.innerHTML="✓ Rätt! Bra stavat!";
+   input.disabled=true;$("checkSpelling").disabled=true;
+   setTimeout(()=>{spellIndex++;renderSpelling();},900);
+ }else{
+   spellLocked=true;
+   feedback.innerHTML="Inte riktigt ännu. Försök en gång till!";
+   input.select();
+ }
+}
+
+function startQuiz(name){currentQuiz={name,data:quizzes[name]};q=0;points=0;const rb=$("rememberBox"),rt=$("rememberText");if(reminders[name]){rt.textContent=reminders[name];rb.style.display="block"}else{rb.style.display="none"}renderQuestion();show("quiz")}
+function renderQuestion(){
+ locked=false;const item=currentQuiz.data[q];$("quizName").textContent=currentQuiz.name;$("score").textContent=`${points} rätt`;
+ $("question").textContent=item[0];$("answers").innerHTML="";$("feedback").textContent="";$("feedback").className="feedback";$("next").classList.add("hidden");
+ item[1].forEach((txt,i)=>{const b=document.createElement("button");b.className="answer";b.textContent=txt;b.onclick=()=>answer(i,item[2]);$("answers").appendChild(b)});
+}
+function answer(i,correct){
+ if(locked)return;locked=true;document.querySelectorAll(".answer").forEach(b=>b.disabled=true);
+ if(i===correct){points++;$("feedback").textContent="⭐ Rätt! Bra jobbat!";$("feedback").classList.add("good")}
+ else{$("feedback").textContent="Nästan! Rätt svar är: "+currentQuiz.data[q][1][correct];$("feedback").classList.add("bad")}
+ $("score").textContent=`${points} rätt`;$("next").textContent=q===currentQuiz.data.length-1?"Se resultat →":"Nästa fråga →";$("next").classList.remove("hidden");
+}
+$("next").onclick=()=>{q++;if(q<currentQuiz.data.length)renderQuestion();else{$("question").textContent="🎉 Klart!";$("answers").innerHTML=`<p>Du fick <b>${points} av ${currentQuiz.data.length} rätt!</b></p>`;$("feedback").textContent=points===currentQuiz.data.length?"Fantastiskt – alla rätt! ⭐":"Bra tränat! Du kan gå tillbaka och prova igen.";$("next").classList.add("hidden")}};
+$("homeBtn").onclick=()=>show("home");$("roomBtn").onclick=()=>openRoom(currentRoom);$("weeklyBack").onclick=()=>openRoom("svenska");$("wordBack").onclick=openWeeklyWords;$("practiceWeek").onclick=()=>makeWeekQuiz(selectedWeek);$("spellWeek").onclick=startSpelling;$("flashWeek").onclick=startFlashcards;$("memoryWeek").onclick=startMemory;$("spellingBack").onclick=()=>openWeek(selectedWeek);$("flashBack").onclick=()=>openWeek(selectedWeek);$("memoryBack").onclick=()=>openWeek(selectedWeek);$("flashCard").onclick=flipFlash;$("flashFlip").onclick=flipFlash;$("flashNext").onclick=nextFlash;$("flashPrev").onclick=prevFlash;buildRooms();
+</script>
+</body></html>
